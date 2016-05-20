@@ -1,0 +1,311 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+    <h:head>
+        <title>Course en ligne - Connexion</title>
+        <style>
+            .ui-bg {
+                background-image:url("../resources/images/background/bg1.jpg") !important;
+                background-repeat: no-repeat;
+                background-size: 100% 100%;
+                width: 100%;
+                height: 100%;
+                margin: auto;
+                margin-top:auto;
+            }
+            .ui-dock-bottom {
+                width: 100%;
+                bottom: 0px;
+                position: absolute;
+                left: 0px;
+            }
+            .ui-dock-container-bottom {
+                position: fixed;
+                height: 20px !important;
+                background: none;
+                left:75%;
+                background-color: #ecf0f1;
+                padding-left: 20px;
+                alignment-adjust: central;
+                border-radius: 10% / 90%;
+                /*margin-top:-30px;*/
+            }
+            a.ui-dock-item-bottom {
+                display: block; 
+                font: bold 12px Arial, Helvetica, sans-serif;
+                width: 40px; 
+                color: #ffffff !important; 
+                bottom: 0px; 
+                position: absolute;
+                text-align: center;
+                text-decoration: #ffffff !important;
+            }
+            .ui-dock-item-bottom span {
+                display: none;
+                padding-left: 20px;
+            }
+            .ui-dock-item-bottom img {
+                border: none; 
+                margin: 5px 10px 0px; 
+                width: 100%; 
+            }
+            .rightAl {
+                text-align: right;
+            }
+
+        </style>
+        <meta name="viewport" content="width=device-width"/>
+
+        <!-- Script nécessaire au fonctionnement de Google Maps --> 
+
+        <script src="http://maps.google.com/maps/api/js?sensor=true|false" type="text/javascript"></script>
+        <script type="text/javascript">
+            PrimeFaces.locales ['fr'] = {
+                closeText: 'Fermer',
+                prevText: 'Précédent',
+                nextText: 'Suivant',
+                monthNames: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+                monthNamesShort: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+                dayNames: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+                dayNamesShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                dayNamesMin: ['D', 'L', 'M', 'M', 'J', 'V', 'S'],
+                weekHeader: 'Semaine',
+                firstDay: 1,
+                isRTL: false,
+                showMonthAfterYear: false,
+                yearSuffix: '',
+                timeOnlyTitle: 'Choisir l\'heure',
+                timeText: 'Heure',
+                hourText: 'Heures',
+                minuteText: 'Minutes',
+                secondText: 'Secondes',
+                currentText: 'Maintenant',
+                ampm: false,
+                month: 'Mois',
+                week: 'Semaine',
+                day: 'Jour',
+                allDayText: 'Toute la journée'
+            };
+        </script>
+
+        <h:form style="float: right">
+            <p:dialog closable="false"  height="150" width="165" showHeader="false" resizable="false" visible="true" position="right top" draggable="false">
+                <pe:analogClock width="150"/>
+            </p:dialog>
+        </h:form>
+
+        <!-- Fenêtre d'informations sur l'utilisateur courant --> 
+
+        <h:form style="float: left" id="adminForm">
+            <p:dialog closable="false"  height="125" width="300" showHeader="false" resizable="false" visible="true"  position="west" draggable="false" responsive="true">
+                <p:outputPanel autoUpdate="true">
+                    <p:growl id="growl" sticky="false" showDetail="true" life="3000"/>
+                    <h:panelGrid columns="2" cellpadding="10">
+                        <p:graphicImage value="../resources/images/avatars/#{loginController.admin.image}" width="100" height="100"/>
+                        <p:outputLabel value="#{loginController.admin.firstName} #{loginController.admin.lastName} (Administrateur) "/>
+                    </h:panelGrid>
+                </p:outputPanel>
+                <p:poll interval="30" listener="#{lostRunnerController.update}"  autoStart="true"/>
+            </p:dialog>
+        </h:form>
+    </h:head>
+
+    <h:body styleClass="ui-bg">
+        <h:outputStylesheet library="css" name="button.css"/>
+        <!--Dock d'icone-->
+        <h:form id="dockForm">
+            <p:dock position="bottom" itemWidth="70" proximity="100" halign="center">
+                <p:menuitem value="Course" icon="../resources/images/icons/flag.png"  onclick="PF('raceDlg').show()"/>
+                <p:menuitem value="Créer course" icon="../resources/images/icons/map.png"  onclick="PF('createRaceDlg').show()"/>
+                <p:menuitem value="Infos utilisateur" icon="../resources/images/icons/userinf.png" onclick="PF('infoDLg').show()"/>
+                <p:menuitem value="Déconnexion" icon="../resources/images/icons/logout.png" actionListener="#{loginController.logout}" />
+            </p:dock>
+        </h:form>
+
+        <!-- Fenêtre de gestion course --> 
+
+        <h:form> 
+            <p:dialog header="Courses" widgetVar="raceDlg" showEffect="blind" hideEffect="blind" resizable="false" closeOnEscape="true" width="900" height="500">
+                <p:dataTable var="race" value="#{raceListController.races}" >
+                    <p:column headerText="Nom">
+                        <div align="center" >
+                            <p:commandButton value="#{race.name}" onclick="PF('mapDlg').show();" actionListener="#{followRunnerController.getRace}" style="width: 100px; height: 100px; alignment-adjust: central">
+                                <f:attribute name="RaceId" value="#{race.id}" />
+                            </p:commandButton>
+                        </div>
+                    </p:column>
+
+                    <p:column headerText="Début" >
+                        <h:outputText value="#{race.debut}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Fin" >
+                        <h:outputText value="#{race.fin}">
+                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Distance">
+                        <h:outputText value="#{race.distance}" />
+                    </p:column>
+
+                    <p:column headerText="Grade">
+                        <p:dataGrid id="ranks" value="#{race.ranks}" var="rank">
+                            <h:outputText value="#{rank.code}" style="margin-left: -5px"/>
+                        </p:dataGrid>
+                    </p:column>
+
+                    <p:column headerText="Nb d'inscrits">
+                        <h:outputText value="#{race.entrants.size()}"/>
+                    </p:column>
+                </p:dataTable>
+            </p:dialog>
+        </h:form>
+
+        <!-- Fenêtre de l'affichage des course sur la carte --> 
+
+        <h:form id="mapForm">
+            <p:dialog header="Carte" id="gmapDlg" widgetVar="mapDlg" width="1200" height="425" modal="true" resizable="false" closeOnEscape="true" position="center center">
+                <p:poll interval="5" listener="#{followRunnerController.update}" autoStart="true" />
+                <p:ajax event="close" listener="#{followRunnerController.closeWindow}"/>
+                <h:panelGrid columns="2" cellpadding="10">
+                    <p:gmap id="gmap" center="#{followRunnerController.current.middle}" model="#{followRunnerController.mapModel}" widgetVar="map" zoom="#{followRunnerController.currentRace.zoomLevel}" type="HYBRID" style="width:600px;height:400px" fitBounds="false">
+                        <p:ajax event="stateChange" listener="#{followRunnerController.onStateChange}"/>
+                        <p:ajax event="overlaySelect" listener="#{followRunnerController.onMarkerSelect}"/>
+                        <p:gmapInfoWindow id="infoWindow">
+                            <p:outputPanel style="text-align: center; display: block; margin: auto">
+                                <h:outputText value="#{followRunnerController.mrkcur.title}" />
+                                <br />
+                                <h:outputText value="#{followRunnerController.mrkcur.data}" />
+                            </p:outputPanel>
+                        </p:gmapInfoWindow>
+                    </p:gmap>
+                    <h:panelGrid columns="2">
+                        <p:outputPanel autoUpdate="true" id="runnerPanel">
+                            <p:dataTable value="#{followRunnerController.currentRace.entrants}" var="entrant" id="dataRunner">
+                                <p:column headerText="Afficher ?" >
+                                    <p:selectBooleanCheckbox value="#{entrant.followed}" valueChangeListener="#{followRunnerController.followRunner}" immediate="true">
+                                        <f:attribute name="RunnerId" value="#{entrant.id}"/>
+                                        <p:ajax process="@this"/>
+                                    </p:selectBooleanCheckbox>
+                                </p:column>
+                                <p:column headerText="Nom" >
+                                    <h:outputText value="#{entrant.lastName}"/>
+                                </p:column>
+
+                                <p:column headerText="Prénom" >
+                                    <h:outputText value="#{entrant.firstName}"/>
+                                </p:column>
+
+                                <p:column headerText="Numéro" >
+                                    <h:outputText value="#{entrant.id}"/>
+                                </p:column>
+                                <f:facet name="footer">
+                                    Il y a #{followRunnerController.current.entrants.size()} coureur(s) sur cette course.
+                                </f:facet>
+                            </p:dataTable>
+                        </p:outputPanel>
+                    </h:panelGrid>
+                </h:panelGrid>
+            </p:dialog>
+        </h:form>
+
+        <!-- Fenêtre de création de course --> 
+
+        <h:form>
+            <p:dialog id="createRaceDlg" widgetVar="createRaceDlg" header="Création de course" closable="true" height="100" width="800" resizable="false" closeOnEscape="true" position="center center" showEffect="blind" hideEffect="blind">
+                <p:outputLabel value="Veuillez nous excusez la création de course n'est pas encore disponible"/>
+            </p:dialog>
+        </h:form>
+
+        <!-- Fenêtre d'affichage d'un coureur perdu --> 
+
+        <h:form id="lostForm">
+            <p:dialog id="lostPanel" widgetVar="lostPanel" header="Coureur perdue !" visible="false" position="center center" showEffect="blind" hideEffect="blind" modal="true" resizable="false" width="1000" height="425">
+                <p:ajax event="close" listener="#{lostRunnerController.stopLost}" />
+                <p:poll interval="5" listener="#{lostRunnerController.update}" autoStart="true"/>
+                <p:outputPanel autoUpdate="true">
+                    <h:panelGrid columns="2" cellpadding="10">
+                        <p:gmap id="gmapLost" center="#{lostRunnerController.currentRace.middle}" model="#{lostRunnerController.mapModel}" zoom="#{lostRunnerController.zoomLevel}"
+                                style="width:600px;height:400px" type="HYBRID"  fitBounds="false">
+                            <p:ajax event="stateChange" listener="#{lostRunnerController.onStateChange}"/>
+                            <p:ajax event="overlaySelect" listener="#{lostRunnerController.onMarkerSelect}"/>
+                        </p:gmap>
+                        <h:panelGrid columns="2" cellpadding="10">
+                            <p:outputLabel value="Nom : "/>
+                            <p:outputLabel value="#{lostRunnerController.lostRunner.firstName}"/>
+                            <p:outputLabel value="Prénom : "/>
+                            <p:outputLabel value="#{lostRunnerController.lostRunner.lastName}"/>
+                            <p:outputLabel value="N° de coureur : "/>
+                            <p:outputLabel value="#{lostRunnerController.lostRunner.id}"/>
+                            <p:outputLabel value="Numéro de téléphone : "/>
+                            <p:outputLabel value="#{lostRunnerController.lostRunner.phone}"/>
+                        </h:panelGrid>  
+                    </h:panelGrid>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <!--Fenêtre de modification d'informations Administrateur --> 
+
+        <h:form >
+            <p:dialog header="Informations Utilisateur" widgetVar="infoDLg" showEffect="blind" hideEffect="blind" position="center center" style="margin: auto" resizable="false">
+                <p:outputPanel autoUpdate="true">
+                    <h:panelGrid columns="2" cellpadding="5">
+                        <h:outputLabel/>
+                        <p:graphicImage value="../resources/images/avatars/#{loginController.admin.image}" width="100" height="100"/>
+                        <h:outputLabel for="prenom" value="Prenom:" style="font-weight:bold"/>
+                        <p:inplace id="prenom" editor="true">
+                            <p:inputText value="#{editUserController.admin.firstName}" required="true" label="text"/>
+                        </p:inplace>
+                        <h:outputLabel for="nom" value="Nom:" style="font-weight:bold"/>
+                        <p:inplace id="nom" editor="true">
+                            <p:inputText value="#{editUserController.admin.lastName}" required="true" label="text"/>
+                        </p:inplace>
+                        <h:outputLabel for="Date" value="Date de naissance:" style="font-weight:bold"/>
+                        <p:outputLabel id ="Date" value="#{editUserController.admin.birth}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" timeZone="Europe/Paris"/>
+                        </p:outputLabel>
+                        <h:outputLabel for="email" value="Email:" style="font-weight:bold"/>
+                        <p:inplace id="email" editor="true">
+                            <p:inputText value="#{editUserController.admin.email}" required="true" label="text"/>
+                        </p:inplace>
+                        <h:outputLabel for="phone" value="Téléphone:" style="font-weight:bold"/>
+                        <p:inplace id="phone" editor="true">
+                            <p:inputText value="#{editUserController.admin.phone}" required="true" label="text"/>
+                        </p:inplace>
+                        <h:outputLabel for="login" value="Nom de compte:" style="font-weight:bold"/>
+                        <p:inplace id="login" editor="true">
+                            <p:inputText value="#{editUserController.admin.login}" required="true" label="text"/>
+                        </p:inplace>
+                        <p:commandButton value="changer mot de passe" styleClass="ui-priority-primary" onclick="PF('editPassDlg').show()"/>
+                        <p:commandButton value="Confirmer" onclick="PF('infoDLg').hide()" update="adminForm:growl" actionListener="#{editUserController.edit}" ajax="false" />
+                    </h:panelGrid>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <!-- Fenêtre de modification de mot de passe --> 
+
+        <h:form>
+            <p:dialog widgetVar="editPassDlg" closable="false" resizable="false" showHeader="false" closeOnEscape="true">
+                <h:panelGrid columns="2" cellpadding="20">
+                    <p:outputLabel value="Ancien mot de passe :"/>
+                    <p:password value="#{editUserController.oldPass}" required="true" requiredMessage="Veuillez entrer l'ancien mot de passe !"/>
+                    <p:outputLabel value="Nouveau mot de passe :"/>
+                    <p:password value="#{editUserController.newPass}" required="true" label="password" feedback="true" inline="true" weakLabel="Peu sécurisé" goodLabel="Sécurisé" strongLabel="Trés sécurisé" requiredMessage="Veuillez entrer un nouveau mot de passe :"/>
+                    <p:outputLabel value="Répéter nouveau mot de passe :" />
+                    <p:password value="#{editUserController.newPassRep}" required="true" requiredMessage="Veuillez répeter le nouveau mot de passe :"/>
+                    <p:commandButton value="Annuler" onclick="PF('editPassDlg').hide()"/>
+                    <p:commandButton value="Confirmer" onclick="PF('editPassDlg').hide();
+                            PF('infoDLg').hide()" actionListener="#{editUserController.changePass}" update="adminForm:growl" styleClass="ui-priority-primary" />
+                </h:panelGrid>
+            </p:dialog>
+        </h:form>
+
+    </h:body>
+</html>

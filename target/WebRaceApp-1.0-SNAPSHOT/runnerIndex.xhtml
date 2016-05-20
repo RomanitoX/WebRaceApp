@@ -1,0 +1,323 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <h:head>
+        <title>Course en ligne - Connexion</title>
+        <style>
+            .ui-bg {
+                background-image:url("../resources/images/background/bg1.jpg") !important;
+                background-repeat: no-repeat;
+                background-size: 100% 100%;
+                width: 100%;
+                margin: auto;
+                margin-top:auto;
+            }
+            .ui-dock-bottom {
+                width: 100%;
+                bottom: 0px;
+                position: absolute;
+                left: 0px;
+            }
+            .ui-dock-container-bottom {
+                position: fixed;
+                height: 20px !important;
+                background: none;
+                left:75%;
+                background-color: #ecf0f1;
+                padding-left: 20px;
+                alignment-adjust: central;
+                border-radius: 10% / 90%;
+                /*margin-top:-30px;*/
+            }
+            a.ui-dock-item-bottom {
+                display: block; 
+                font: bold 12px Arial, Helvetica, sans-serif;
+                width: 40px; 
+                color: #ffffff !important; 
+                bottom: 0px; 
+                position: absolute;
+                text-align: center;
+                text-decoration: #ffffff !important;
+            }
+            .ui-dock-item-bottom span {
+                display: none;
+                padding-left: 20px;
+            }
+            .ui-dock-item-bottom img {
+                border: none; 
+                margin: 5px 10px 0px; 
+                width: 100%; 
+            }
+            .rightAl {
+                text-align: right;
+            }
+
+        </style>
+        <script type="text/javascript">
+            PrimeFaces.locales ['fr'] = {
+                closeText: 'Fermer',
+                prevText: 'Précédent',
+                nextText: 'Suivant',
+                monthNames: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+                monthNamesShort: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+                dayNames: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+                dayNamesShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                dayNamesMin: ['D', 'L', 'M', 'M', 'J', 'V', 'S'],
+                weekHeader: 'Semaine',
+                firstDay: 1,
+                isRTL: false,
+                showMonthAfterYear: false,
+                yearSuffix: '',
+                timeOnlyTitle: 'Choisir l\'heure',
+                timeText: 'Heure',
+                hourText: 'Heures',
+                minuteText: 'Minutes',
+                secondText: 'Secondes',
+                currentText: 'Maintenant',
+                ampm: false,
+                month: 'Mois',
+                week: 'Semaine',
+                day: 'Jour',
+                allDayText: 'Toute la journée'
+            };
+        </script>
+        <script src="http://maps.google.com/maps/api/js?sensor=true|false" type="text/javascript"/>
+        <h:form style="float: right">
+            <p:dialog closable="false"  height="175" width="175" showHeader="false" resizable="false" visible="true" position="right top" responsive="true">
+                <pe:analogClock width="150"/>
+                <p:outputLabel/>
+                <div align="center">
+                    <p:outputLabel/>
+                    <p:clock pattern="dd/MM/yyyy" mode="server" />
+                </div>
+            </p:dialog>
+        </h:form>
+        <h:form style="float: left">
+            <p:dialog closable="false"  height="150" width="300" showHeader="false" resizable="false" visible="true" position="west"  responsive="true">
+                <p:outputPanel autoUpdate="true">
+                    <h:panelGrid columns="3" cellspacing="10">
+                        <p:graphicImage value="../resources/images/avatars/#{loginController.runner.image}" width="100" height="100"/>
+                        <p:outputLabel value="#{loginController.runner.firstName} #{loginController.runner.lastName}"/>
+                    </h:panelGrid>
+                    <h:panelGrid columns="1">
+                        <p:outputLabel value="Coureur N° : #{loginController.runner.id}" style="margin-left:80px"/>
+                    </h:panelGrid>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+    </h:head>
+    <h:body styleClass="ui-bg">
+        <p:growl id="growl" sticky="false" showDetail="true" life="3000" />
+        <h:outputStylesheet library="css" name="button.css"/>
+        <!--Dock d'icone-->
+        <h:form>
+            <p:dock position="bottom" itemWidth="70" proximity="100" halign="center">
+                <p:menuitem value="Course" icon="../resources/images/icons/flag.png"  onclick="PF('raceDlg').show()"/>
+                <p:menuitem value="Calendrier" icon="../resources/images/icons/calendar.png" onclick="PF('calDlg').show()" />
+                <p:menuitem value="Infos utilisateur" icon="../resources/images/icons/userinf.png" onclick="PF('infoDLg').show()"/>
+                <p:menuitem value="Déconnexion" icon="../resources/images/icons/logout.png" actionListener="#{loginController.logout}" />
+            </p:dock>
+        </h:form>
+
+        <!--Fenêtre de gestion course--> 
+
+        <h:form>
+            <p:dialog id="raceDialog" header="Courses" widgetVar="raceDlg" showEffect="blind" hideEffect="blind" resizable="false" closeOnEscape="true" width="900" height="500">
+                <p:outputPanel autoUpdate="true">
+                    <h:panelGrid columns="2">
+                        <p:dataTable var="race" value="#{raceListController.races}">
+                            <p:column headerText="Nom">
+                                <div align="center" >
+                                    <p:commandButton value="#{race.name}" onclick="PF('mapDlg').show();" actionListener="#{subscribeRaceController.getRace}" style="width: 100px; height: 100px; alignment-adjust: central" >
+                                        <f:attribute name="RaceId" value="#{race.id}" />
+                                    </p:commandButton>
+                                </div>
+                            </p:column>
+
+                            <p:column headerText="Début" >
+                                <h:outputText value="#{race.debut}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Fin" >
+                                <h:outputText value="#{race.fin}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Distance">
+                                <h:outputText value="#{race.distance}" style="center"/>
+                            </p:column>
+
+                            <p:column headerText="Grade">
+                                <p:dataGrid id="ranks" value="#{race.ranks}" var="rank">
+                                    <h:outputText value="#{rank.code}" style="margin-left: -5px"/>
+                                </p:dataGrid>
+                            </p:column>
+
+                        </p:dataTable> 
+                        <p:dataTable var="suscribe" value="#{raceListController.suscribes}" style=" margin: 0px; width:150px">
+                            <p:column headerText="Inscrit ?" style="height: 25px;">
+                                <p:selectBooleanButton value="#{suscribe}" onLabel="" offLabel="" onIcon="ui-icon-check" offIcon="ui-icon-close" disabled="true" style="width:33px; height: 98px;margin-left: 50px" />
+                            </p:column>
+                        </p:dataTable>
+                    </h:panelGrid>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <!--Fenêtre de Google Maps--> 
+
+        <h:form>
+            <p:dialog header="Carte" id="gmapDialog" widgetVar="mapDlg" width="1000" height="auto" resizable="false" closeOnEscape="true" showEffect="blind" hideEffect="blind" modal="true">
+                <p:outputPanel autoUpdate="true">
+                    <h:panelGrid columns="2" cellpadding="10">
+                        <p:gmap id="gmap"  center="#{subscribeRaceController.current.middle}" model="#{subscribeRaceController.mapModel}" zoom="13" type="HYBRID" style="width:600px;height:400px"/>
+                        <h:panelGrid columns="2" cellpadding="20">
+                            <h:outputText value="Nom :" style="font-weight: bold"/>
+                            <p:outputLabel value="#{subscribeRaceController.current.name}" />
+                            <h:outputText value="Rang :" style="font-weight: bold" />
+                            <p:dataGrid id="ranks" value="#{subscribeRaceController.current.ranks}" var="rank">
+                                <h:outputText value="#{rank.code}" />
+                            </p:dataGrid>
+                            <h:outputText value="Distance : " style="font-weight: bold" />
+                            <p:outputLabel value="#{subscribeRaceController.currentRace.distance}"/>
+                        </h:panelGrid>
+                    </h:panelGrid>
+
+
+                    <h:panelGrid columns="3" cellpadding="15">
+                        <p:outputLabel value="Participants " style="font-weight: bold" />
+                        <p:dataTable value="#{subscribeRaceController.current.entrants}" var="entrant">
+                            <p:column headerText="Nom" >
+                                <h:outputText value="#{entrant.lastName}"/>
+                            </p:column>
+
+                            <p:column headerText="Prénom" >
+                                <h:outputText value="#{entrant.firstName}"/>
+                            </p:column>
+
+                            <p:column headerText="Age" >
+                                <h:outputText value="#{entrant.age}"/>
+                            </p:column>
+
+                            <p:column headerText="Rang" >
+                                <h:outputText value="#{entrant.rank}"/>
+                            </p:column>
+                        </p:dataTable>
+                        <p:commandButton actionListener="#{subscribeRaceController.subscribeUnsubscribeRace}" value="#{subscribeRaceController.suscribe}"/>
+                    </h:panelGrid>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <!--Fenêtre de gestion Calendrier--> 
+
+        <h:form>
+            <p:dialog header="Calendrier" id="calDialog" widgetVar="calDlg" showEffect="blind" hideEffect="blind" position="50,50" width="650" height="505" resizable="false" closeOnEscape="true">
+                <p:growl id="growl" sticky="false" showDetail="true" life="3000" />
+                <p:schedule id="schedule" value="#{scheduleController.eventModel}" widgetVar="myschedule" timeZone="GMT+2" locale="fr" axisFormat="HH:mm" timeFormat="HH:mm" >
+                    <p:ajax event="dateSelect" listener="#{scheduleController.onDateSelect}" update="eventDetails" oncomplete="PF('eventDialog').show();" />
+                    <p:ajax event="eventSelect" listener="#{scheduleController.onEventSelect}" update="eventDetails" oncomplete="PF('eventDialog').show();"/>
+                    <p:ajax event="eventMove" listener="#{scheduleController.onEventMove}" update="growl" />
+                    <p:ajax event="eventResize" listener="#{scheduleController.onEventResize}" update="growl" />
+                </p:schedule>
+            </p:dialog>
+            <p:dialog widgetVar="eventDialog" header="Détails de l'évenement" showEffect="clip" hideEffect="clip" modal="true" closeOnEscape="true">
+                <h:panelGrid id="eventDetails" columns="2">
+                    <p:outputLabel for="title" value="Titre:" />
+                    <p:inputText id="title" value="#{scheduleController.event.title}" required="true" />
+
+                    <p:outputLabel for="from" value="De: " />
+                    <p:calendar id="from" value="#{scheduleController.event.startDate}" timeZone="GMT+1" pattern="dd/MM/yyyy HH:mm"/>
+
+                    <p:outputLabel for="to" value="A:" />
+                    <p:calendar id="to" value="#{scheduleController.event.endDate}" timeZone="GMT+1" pattern="dd/MM/yyyy HH:mm"/>
+
+                    <p:outputLabel for="allDay" value="Toute la journée:" />
+                    <h:selectBooleanCheckbox id="allDay" value="#{scheduleController.event.allDay}" />
+
+                    <p:commandButton type="delete" value="Supprimer" actionListener="#{scheduleController.deleteEvent}" oncomplete="PF('myschedule').update();PF('eventDialog').hide();"/>
+                    <p:commandButton id="addButton" value="Confirmer" actionListener="#{scheduleController.addEvent}" oncomplete="PF('myschedule').update();PF('eventDialog').hide();" />
+                </h:panelGrid>
+
+            </p:dialog>    
+        </h:form>
+
+        <!--Fenêtre de gestion Coureur--> 
+
+        <h:form>
+            <p:dialog header="Informations Coureur" widgetVar="infoDLg" showEffect="blind" hideEffect="blind" style="margin: auto" resizable="false" closable="true" closeOnEscape="true" >
+                <p:outputPanel autoUpdate="true">
+                    <h:panelGrid columns="2" cellpadding="5">
+                        <h:outputLabel/>
+                        <p:commandLink onclick="PF('dlgAvatar').show()">
+                            <p:graphicImage value="../resources/images/avatars/#{loginController.runner.image}" width="100" height="100"/>
+                        </p:commandLink>
+                        <h:outputLabel for="prenom" value="Prenom:" style="font-weight:bold"/>
+                        <p:inplace id="prenom" editor="true">
+                            <p:inputText value="#{editUserController.runner.firstName}" required="true" label="text"/>
+                        </p:inplace>
+                        <h:outputLabel for="nom" value="Nom:" style="font-weight:bold"/>
+                        <p:inplace id="nom" editor="true">
+                            <p:inputText value="#{editUserController.runner.lastName}" required="true" label="text"/>
+                        </p:inplace>
+                        <h:outputLabel value="Grade:" style="font-weight:bold"/>
+                        <p:outputLabel value="#{editUserController.runner.rank.name}" />
+                        <h:outputLabel value="Date de naissance:" style="font-weight:bold"/>
+                        <p:outputLabel value="#{editUserController.runner.birth}">
+                            <f:convertDateTime pattern="dd/MM/yyyy" timeZone="Europe/Paris"/>
+                        </p:outputLabel>
+                        <h:outputLabel for="email" value="Email:" style="font-weight:bold"/>
+                        <p:inplace id="email" editor="true">
+                            <p:inputText value="#{editUserController.runner.email}" required="true" label="text"/>
+                        </p:inplace>
+                        <h:outputLabel for="phone" value="Téléphone:" style="font-weight:bold"/>
+                        <p:inplace id="phone" editor="true">
+                            <p:inputText value="#{editUserController.runner.phone}" required="true" label="text"/>
+                        </p:inplace>
+                        <h:outputLabel for="login" value="Nom de compte:" style="font-weight:bold"/>
+                        <p:inplace id="login" editor="true">
+                            <p:inputText value="#{editUserController.runner.login}" required="true" label="text"/>
+                        </p:inplace>
+                        <p:commandButton value="changer mot de passe" styleClass="ui-priority-primary" onclick="PF('editPassDlg').show()"/>
+                        <p:commandButton value="Confirmer" onclick="PF('infoDLg').hide()" update="growl" actionListener="#{editUserController.edit}" ajax="false" />
+                    </h:panelGrid>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+        <h:form>
+            <p:dialog widgetVar="editPassDlg" closable="false" resizable="false" showHeader="false" closeOnEscape="true">
+                <h:panelGrid columns="2" cellpadding="20">
+                    <p:outputLabel value="Ancien mot de passe :"/>
+                    <p:password value="#{editUserController.oldPass}" required="true" requiredMessage="Veuillez entrer l'ancien mot de passe !"/>
+                    <p:outputLabel value="Nouveau mot de passe :"/>
+                    <p:password value="#{editUserController.newPass}" required="true" label="password" feedback="true" inline="true" weakLabel="Peu sécurisé" goodLabel="Sécurisé" strongLabel="Trés sécurisé" requiredMessage="Veuillez entrer un nouveau mot de passe :"/>
+                    <p:outputLabel value="Répéter nouveau mot de passe :" />
+                    <p:password value="#{editUserController.newPassRep}" required="true" requiredMessage="Veuillez répeter le nouveau mot de passe :"/>
+                    <p:commandButton value="Annuler" onclick="PF('editPassDlg').hide()"/>
+                    <p:commandButton value="Confirmer" onclick="PF('editPassDlg').hide();
+                            PF('infoDLg').hide()" actionListener="#{editUserController.changePass}" update="growl" styleClass="ui-priority-primary" />
+                </h:panelGrid>
+            </p:dialog>
+        </h:form>
+
+        <h:form>
+            <p:growl id="growl" sticky="false" showDetail="true" life="3000"/>
+            <h:panelGrid columns="1" cellpadding="5">
+                <p:dialog header="Choix d'avatar" widgetVar="dlgAvatar" showEffect="clip" hideEffect="clip" height="200" width="900" resizable="false" position="bottom" showHeader="false" closeOnEscape="true">
+                    <p:ring autoplay="true" autoplayPauseOnHover="true" value="#{imagesController.images}" var="image" styleClass="image-ring">
+                        <p:commandLink>
+                            <f:setPropertyActionListener value="#{image}" target="#{editUserController.runner.image}" />
+                            <p:graphicImage id="img" name="/images/avatars/#{image}" width="140" height="140" onclick="PF('dlgAvatar').hide()"/>
+                        </p:commandLink>
+                    </p:ring>
+                </p:dialog>
+            </h:panelGrid>
+        </h:form>
+    </h:body>
+</html>

@@ -1,0 +1,131 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+    <h:head>
+        <title>Course en ligne - Connexion</title>
+        <style>
+            .ui-bg {
+                background-image:url("resources/images/background/bg3.jpg");
+                background-repeat: no-repeat;
+                background-size: 100% 100%;
+                width: 100%;
+                margin: auto;
+                margin-top:auto;
+            }
+        </style>
+        <script type="text/javascript">
+            PrimeFaces.locales ['fr'] = {
+                closeText: 'Fermer',
+                prevText: 'Précédent',
+                nextText: 'Suivant',
+                monthNames: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+                monthNamesShort: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+                dayNames: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+                dayNamesShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                dayNamesMin: ['D', 'L', 'M', 'M', 'J', 'V', 'S'],
+                weekHeader: 'Semaine',
+                firstDay: 1,
+                isRTL: false,
+                showMonthAfterYear: false,
+                yearSuffix: '',
+                timeOnlyTitle: 'Choisir l\'heure',
+                timeText: 'Heure',
+                hourText: 'Heures',
+                minuteText: 'Minutes',
+                secondText: 'Secondes',
+                currentText: 'Maintenant',
+                ampm: false,
+                month: 'Mois',
+                week: 'Semaine',
+                day: 'Jour',
+                allDayText: 'Toute la journée'
+            };
+        </script>
+        <h:inputHidden value="#{smsController.launch}"/>
+    </h:head>
+
+    <h:body styleClass="ui-bg">
+        <h:outputStylesheet library="css" name="button.css"/>
+        <div align="center">
+
+            <h:form>
+                <h:panelGrid columns="1" cellpadding="50">
+                    <p:growl id="growl" sticky="false" showDetail="true" life="3000" />
+                    <p:panel id="loginPanel" style="margin:auto; height: 140px; width: 275px; margin-top: 60px">
+                        <h:panelGrid id="base" columns="1">
+                            <p:inputText id="username" value="#{loginController.login}" required="true" label="username" styleClass="form-1" style="margin-left: 40px" requiredMessage="Veuillez entrer un nom de compte"/>
+                            <p:watermark for="username" value ="Nom de compte" id="watermarkUse" />
+                            <p:password id="password" value="#{loginController.password}" required="true" label="password" style="margin-top: 4px;margin-left: 40px" requiredMessage="Veuillez entrer un mot de passe" />
+                            <p:watermark for="password" value ="Mot de passe" id="watermarkPass" />
+                            <p:commandLink actionListener="#{loginController.login}" update="growl">
+                                <h:graphicImage value="resources/images/icons/login.png" width="100" height="100" style="margin-left: 70px ; margin-top: 5px"/>
+                            </p:commandLink>
+                        </h:panelGrid>
+                    </p:panel>
+                    <p:panel id="registerPanel" style="width: 120px; margin: auto; height: 70px">
+                        <h:panelGrid columns="1">
+                            <h:outputLabel value="Inscription" style="margin: auto"/>
+                            <p:commandLink>
+                                <h:graphicImage value="resources/images/icons/register.png" width="100" height="100" style="margin-left: -10px" onclick="PF('dlgSus').show()"/>
+                            </p:commandLink>
+                        </h:panelGrid>
+                    </p:panel>
+                    <p:graphicImage id="key" value="resources/images/icons/key.png" width="45" height="45" style="margin-top:-385px; margin-left: 10px"/>
+                    <p:graphicImage id="user" value="resources/images/icons/user.png" width="45" height="45" style="margin-top: -528px; margin-left: 10px" />
+                    <p:media value="resources/music/forest.mp3" player="quicktime" width="0" height="0">
+                        <f:param name="volume" value="0" /> 
+                    </p:media>
+                </h:panelGrid>
+            </h:form>
+
+            <h:form>
+                <p:growl id="growl" sticky="false" showDetail="true" life="3000"/>
+                <p:dialog widgetVar="dlgSus" showEffect="blind" hideEffect="blind" height="75" width="1650" resizable="false" position="top" closeOnEscape="true" showHeader="false" style="margin:auto;">
+
+                    <h:panelGrid columns="20" cellpadding="5" >
+                        <p:outputPanel autoUpdate="true">
+                            <p:commandLink>
+                                <h:graphicImage value="resources/images/avatars/#{subscribeRunnerController.image}" width="50" height="50" style="margin-top: 10px; margin-left: -65px" onclick="PF('dlgAvatar').show();"/>
+                            </p:commandLink>
+                        </p:outputPanel>
+                        <p:inputText id="nom" label="nom" value="#{subscribeRunnerController.lastName}" required="true" size="10"/>
+                        <p:watermark for="nom" value="Nom"/>
+                        <p:inputText id="prenom" label="prenom" value="#{subscribeRunnerController.firstName}" required="true" size="10"/>
+                        <p:watermark for="prenom" value="Prénom"/>
+                        <p:calendar id="birthDateCal" pattern="dd/MM/yyyy" mask="true" value="#{subscribeRunnerController.birthday}" navigator="true" required="true" label="date" yearRange="c-80:c-0" locale="fr" size="8" />
+                        <p:watermark for="birthDateCal" value="Date de naissance"/>
+                        <p:inputText id="email" label="email" value="#{subscribeRunnerController.email}" required="true"/>
+                        <p:watermark for="email" value="Email"/>
+                        <p:inputMask id="phone" value="#{subscribeRunnerController.phone}" mask="9999999999" size="9"/>
+                        <p:watermark for="phone" value="N° Portable"/>
+                        <p:inputText id="login"  label="login" value="#{subscribeRunnerController.login}" required="true"/>
+                        <p:watermark for="login" value="Nom de compte"/>
+                        <p:password id="password2" value="#{subscribeRunnerController.password}" required="true" label="password" feedback="true" inline="true" weakLabel="Peu sécurisé" goodLabel="Sécurisé" strongLabel="Trés sécurisé"/>
+                        <p:watermark for="password2" value="Mot de passe"/>
+                        <p:password id="password3" value="#{subscribeRunnerController.verifyPassword}" required="true" label="password" feedback="true" inline="true" weakLabel="Peu sécurisé" goodLabel="Sécurisé" strongLabel="Trés sécurisé"/>
+                        <p:watermark for="password3" value="Répéter mot de passe"/>
+                        <p:commandLink actionListener="#{subscribeRunnerController.save}" update="growl" style="margin-right: -50px">
+                            <h:graphicImage value="resources/images/icons/check.png" width="50" height="50" />
+                        </p:commandLink>
+                    </h:panelGrid>
+                </p:dialog>
+            </h:form>
+
+            <h:form>
+                <p:growl id="growl" sticky="false" showDetail="true" life="3000"/>
+                <h:panelGrid columns="1" cellpadding="5">
+                    <p:dialog header="Choix d'avatar" widgetVar="dlgAvatar" showEffect="clip" hideEffect="clip" height="200" width="900" resizable="false" position="bottom" showHeader="false" closeOnEscape="true">
+                        <p:ring autoplay="true" autoplayPauseOnHover="true" value="#{imagesController.images}" var="image" styleClass="image-ring">
+                            <p:commandLink>
+                                <f:setPropertyActionListener value="#{image}" target="#{subscribeRunnerController.image}" />
+                                <p:graphicImage id="img" name="/images/avatars/#{image}" width="140" height="140" onclick="PF('dlgAvatar').hide()"/>
+                            </p:commandLink>
+                        </p:ring>
+                    </p:dialog>
+                </h:panelGrid>
+            </h:form>
+        </div>
+    </h:body>
+</html>
